@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../conf.dart';
 
@@ -16,8 +17,8 @@ class _SipExampleState extends State<TypedSipExample> {
   late JanusSession session;
   JanusSipPlugin? sip;
   Map credentials = {
-    'creds1': {'proxy': 'sip:sip.linphone.org', 'username': 'sip:maksim11111@sip.linphone.org', 'secret': '1234567q'},
-    'creds2': {'proxy': 'sip:sip.linphone.org', 'username': 'sip:educampus@sip.linphone.org', 'secret': '1234567q'}
+    'creds1': {'proxy': 'sip:cld.alovoice.uz:65040', 'username': 'sip:3006@cld.alovoice.uz:65040', 'secret': '8b1e39'},
+    'creds2': {'proxy': 'sip:cld.alovoice.uz:65040', 'username': 'sip:3007@cld.alovoice.uz:65040', 'secret': '8b1e39'}
   };
   TextEditingController proxyController = TextEditingController(text: "");
   TextEditingController usernameController = TextEditingController(text: "");
@@ -36,12 +37,14 @@ class _SipExampleState extends State<TypedSipExample> {
   String statusMessage = "";
   dynamic _setState;
 
-  Future<void> localMediaSetup() async {
-    MediaStream? temp = await sip?.initializeMediaDevices(mediaConstraints: {'audio': true, 'video': false});
-    localStream = temp;
-  }
+
 
   makeCall() async {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      await Permission.microphone.request();
+      await Permission.camera.request();
+    }
     setState(() {
       enableCallButton = false;
     });
@@ -52,6 +55,11 @@ class _SipExampleState extends State<TypedSipExample> {
     await sip?.call(callUriController.text, offer: offer, autoAcceptReInvites: false);
   }
 
+
+  Future<void> localMediaSetup() async {
+    MediaStream? temp = await sip?.initializeMediaDevices(mediaConstraints: {'audio': true, 'video': false});
+    localStream = temp;
+  }
   openRegisterDialog() async {
     registerDialog = await showDialog(
         context: context,
@@ -144,12 +152,12 @@ class _SipExampleState extends State<TypedSipExample> {
                       decoration: InputDecoration(label: Text("Default call URI")),
                       items: credentials.values
                           .where((e) {
-                            return e['username'] != usernameController.text;
-                          })
+                        return e['username'] != usernameController.text;
+                      })
                           .map((e) => DropdownMenuItem<Map>(
-                                child: Text('${e['username']}'),
-                                value: e,
-                              ))
+                        child: Text('${e['username']}'),
+                        value: e,
+                      ))
                           .toList(),
                       onChanged: (value) {
                         if (value == null) {
@@ -164,8 +172,8 @@ class _SipExampleState extends State<TypedSipExample> {
                   ElevatedButton(
                     onPressed: enableCallButton
                         ? () async {
-                            await makeCall();
-                          }
+                      await makeCall();
+                    }
                         : null,
                     child: Text("Call"),
                   ),
