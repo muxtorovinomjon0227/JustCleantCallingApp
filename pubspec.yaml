@@ -38,6 +38,7 @@ dependencies:
   janus_client: ^2.2.15
   prompt_dialog: ^1.0.9
   flutter_foreground_task: ^3.10.0
+  permission_handler: ^10.3.0
 
 dev_dependencies:
   flutter_test:
